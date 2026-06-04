@@ -449,7 +449,32 @@ function showScreen(name) {
   });
 }
 
-init();
+
+function tryGet(k){try{return localStorage.getItem(k);}catch(e){return null;}}
+function trySet(k,v){try{localStorage.setItem(k,v);}catch(e){}}
+
+// patch state to use tryGet
+state.totalDone = parseInt(tryGet('voca_done')||'0');
+state.streak = parseInt(tryGet('voca_streak')||'0');
+state.lastDate = tryGet('voca_date')||'';
+
+// patch saves
+var _origSaveStreak = saveStreak;
+saveStreak = function(){
+  var today = new Date().toDateString();
+  if(state.lastDate===today) return;
+  var yesterday = new Date(Date.now()-86400000).toDateString();
+  state.streak=(state.lastDate===yesterday)?state.streak+1:1;
+  state.lastDate=today;
+  trySet('voca_streak',state.streak);
+  trySet('voca_date',today);
+};
+
+document.addEventListener('DOMContentLoaded', function(){
+  init();
+  showScreen('home');
+});
+
 </script>
 </body>
 </html>
